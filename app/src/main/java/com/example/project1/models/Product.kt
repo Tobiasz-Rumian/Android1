@@ -1,11 +1,15 @@
 package com.example.project1.models
 
-import java.math.BigDecimal
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
+@Entity
 data class Product(
-    val title: String? = "Untitled",
-    val price: BigDecimal? = BigDecimal.ZERO,
-    val amount: Int = 0,
-    val purchased: Boolean = false
+    @PrimaryKey val uid: Int,
+    @ColumnInfo(name = "title") var title: String? = "Untitled",
+    @ColumnInfo(name = "price") var price: Double = 0.0,
+    @ColumnInfo(name = "amount") var amount: Int = 0,
+    @ColumnInfo(name = "purchased") var purchased: Boolean = false
 )
 

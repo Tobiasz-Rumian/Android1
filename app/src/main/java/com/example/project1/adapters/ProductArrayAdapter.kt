@@ -2,6 +2,7 @@ package com.example.project1.adapters
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,10 @@ class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<ou
         title.text = product.title
         price.text = product.price.toString()+" Zł"
         amount.text = product.amount.toString()
+        isPurchased.setOnClickListener {
+            products[position].purchased=it.isSelected
+            this.notifyDataSetChanged()
+        }
         isPurchased.isChecked = product.purchased
         return view
     }
