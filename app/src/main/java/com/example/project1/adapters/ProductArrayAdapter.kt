@@ -24,7 +24,7 @@ class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<ou
         val amount = view.findViewById(R.id.amount) as TextView
         val isPurchased = view.findViewById(R.id.isPurchased) as CheckBox
         title.text = product.title
-        price.text = product.price.toString()
+        price.text = product.price.toString()+" Zł"
         amount.text = product.amount.toString()
         isPurchased.isChecked = product.purchased
         return view
