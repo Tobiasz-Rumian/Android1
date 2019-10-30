@@ -36,11 +36,11 @@ class OptionsActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.d("XXX","onStart")
-        Log.d("XXX",Integer.toHexString(sharedPreferences.getInt("buttonBackgroundColor",Color.parseColor("#FCFCFC"))))
-        Log.d("XXX",Integer.toHexString(sharedPreferences.getInt("buttonTextColor",Color.parseColor("#FFFFFF"))))
+        Log.d("XXX",Integer.toHexString(sharedPreferences.getInt("buttonBackgroundColor",Color.parseColor("#FFFFFF"))))
+        Log.d("XXX",Integer.toHexString(sharedPreferences.getInt("buttonTextColor",Color.parseColor("#000000"))))
 
-        saveButton.setBackgroundColor(sharedPreferences.getInt("buttonBackgroundColor",Color.parseColor("#FCFCFC")))
-        saveButton.setTextColor(sharedPreferences.getInt("buttonTextColor",Color.parseColor("#FFFFFF")))
+        saveButton.setBackgroundColor(sharedPreferences.getInt("buttonBackgroundColor",Color.parseColor("#FFFFFF")))
+        saveButton.setTextColor(sharedPreferences.getInt("buttonTextColor",Color.parseColor("#000000")))
     }
 
     fun saveChanges(view: View) {

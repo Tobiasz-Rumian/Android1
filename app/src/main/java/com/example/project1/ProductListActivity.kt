@@ -13,16 +13,14 @@ import androidx.room.Room
 import com.example.project1.adapters.ProductArrayAdapter
 import com.example.project1.database.AppDatabase
 import com.example.project1.models.Product
-import java.math.BigDecimal
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import kotlin.random.Random
-import android.widget.Toast
-import android.app.Activity
-import android.os.AsyncTask
-import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import java.lang.ref.WeakReference
+
+
 
 
 class ProductListActivity : AppCompatActivity() {
@@ -42,17 +40,7 @@ class ProductListActivity : AppCompatActivity() {
         addButton = findViewById(R.id.addProductButton)
         deleteButton = findViewById(R.id.removeProductButton)
 
-        database =
-            Room.databaseBuilder(applicationContext, AppDatabase::class.java, "products").build()
-        products = database.productDao().getAll() as ArrayList<Product>
-
-
-        database.productDao().insert(Product(1, "Piano", 200.0, 20))
-        database.productDao().insert(Product(2, "Bread", 2.5, 5))
-        database.productDao().insert(Product(3, "Phone", 150.50, 1))
-//        products.add(Product("Piano", BigDecimal.valueOf(200), 20))
-//        products.add(Product("Bread", BigDecimal.valueOf(2.5), 5))
-//        products.add(Product("Phone", BigDecimal.valueOf(150.50), 1))
+        database = MainActivity.database!!
 
         sharedPreferences = applicationContext.getSharedPreferences(
             applicationContext.packageName,
@@ -61,6 +49,23 @@ class ProductListActivity : AppCompatActivity() {
 
         adapter = ProductArrayAdapter(this, R.layout.product_row, products)
         listView.adapter = adapter
+
+        val populate = Observable.just(database)
+            .subscribeOn(Schedulers.io())
+            .subscribe { db ->
+                run {
+                    if(db.productDao().getAll().isEmpty()){
+                    db.productDao().insert(Product("Piano", 200.0, 20))
+                    db.productDao().insert(Product("Bread", 2.5, 5))
+                    db.productDao().insert(Product("Phone", 150.50, 1))
+                    }
+                    products.addAll(db.productDao().getAll())
+                    runOnUiThread {
+                        adapter.notifyDataSetChanged()
+                    }
+
+                }
+            }
     }
 
     override fun onStart() {
@@ -68,33 +73,36 @@ class ProductListActivity : AppCompatActivity() {
         addButton.setBackgroundColor(
             sharedPreferences.getInt(
                 "buttonBackgroundColor",
-                Color.parseColor("#FCFCFC")
+                Color.parseColor("#FFFFFF")
             )
         )
         addButton.setTextColor(
             sharedPreferences.getInt(
                 "buttonTextColor",
-                Color.parseColor("#FFFFFF")
+                Color.parseColor("#000000")
             )
         )
         deleteButton.setBackgroundColor(
             sharedPreferences.getInt(
                 "buttonBackgroundColor",
-                Color.parseColor("#FCFCFC")
+                Color.parseColor("#FFFFFF")
             )
         )
         deleteButton.setTextColor(
             sharedPreferences.getInt(
                 "buttonTextColor",
-                Color.parseColor("#FFFFFF")
+                Color.parseColor("#000000")
             )
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     fun onAddProduct(view: View) {
         products.add(
             Product(
-                products.size,
                 "New Product nr." + products.size,
                 Random.nextDouble(0.0, 1000.0),
                 Random.nextInt(0, 100)
@@ -106,35 +114,6 @@ class ProductListActivity : AppCompatActivity() {
     fun onRemoveProduct(view: View) {
         products.removeAt(products.size - 1)
         adapter.notifyDataSetChanged()
-    }
-
-    private class AgentAsyncTask(
-        activity: Activity,
-        private val email: String,
-        private val phone: String,
-        private val license: String
-    ) : AsyncTask<Void, Void, Int>() {
-
-        //Prevent leak
-        private val weakActivity: WeakReference<Activity> = WeakReference(activity)
-
-        override fun doInBackground(vararg params: Void): Int? {
-            val agentDao = MyApp.DatabaseSetup.getDatabase().agentDao()
-            return agentDao.agentsCount(email, phone, license)
-        }
-
-        override fun onPostExecute(agentsCount: Int?) {
-            val activity = weakActivity.get() ?: return
-
-            if (agentsCount > 0) {
-                //2: If it already exists then prompt user
-                Toast.makeText(activity, "Agent already exists!", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(activity, "Agent does not exist! Hurray :)", Toast.LENGTH_LONG)
-                    .show()
-                activity.onBackPressed()
-            }
-        }
     }
 
 }
