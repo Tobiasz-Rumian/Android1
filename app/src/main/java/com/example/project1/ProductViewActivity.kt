@@ -36,8 +36,8 @@ class ProductViewActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val productId = intent.getIntExtra("productId",-1)
-        if(productId>0){
+        val productId = intent.getIntExtra("productId", -1)
+        if (productId > 0) {
             subscriptions.add(
                 Observable.just(database)
                     .subscribeOn(Schedulers.io())
@@ -50,6 +50,7 @@ class ProductViewActivity : AppCompatActivity() {
                                 amountTextBox.setText(product.amount.toString())
                                 isPurchasedCheckBox.isChecked = product.purchased
                                 deleteButton.visibility = View.VISIBLE
+                                Log.d("XXX", product.toString())
                             }
                         }
                     })
@@ -59,5 +60,48 @@ class ProductViewActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         subscriptions.forEach(Disposable::dispose)
+    }
+
+    fun onSave(view: View) {
+        val title = titleTextBox.text.takeIf { it.isNotEmpty() }?.toString()?:"Something"
+        val price = priceTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toDouble()?:0.0
+        val amount = amountTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toInt()?:0
+        val purchased =isPurchasedCheckBox.isChecked
+        if (::product.isInitialized) {
+            product.title = title
+            product.price = price
+            product.amount = amount
+            product.purchased = purchased
+            subscriptions.add(
+                Observable.just(database)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe { db ->
+                        run {
+                            db.productDao().update(product)
+                            finish()
+                        }
+                    })
+        } else {
+            product = Product(title, price, amount, purchased)
+            subscriptions.add(
+                Observable.just(database)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe { db ->
+                        run {
+                            db.productDao().insert(product)
+                            finish()
+                        }
+                    })
+        }
+    }
+
+    fun onDelete(view: View) {
+        subscriptions.add(
+            Observable.just(database)
+                .subscribeOn(Schedulers.io())
+                .subscribe { db -> run {
+                    db.productDao().delete(product)
+                    finish()
+                } })
     }
 }

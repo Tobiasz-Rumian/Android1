@@ -1,6 +1,7 @@
 package com.example.project1
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
@@ -13,14 +14,12 @@ import com.example.project1.models.Product
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import kotlin.random.Random
 
 
 class ProductListActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
     private lateinit var addButton: Button
-    private lateinit var deleteButton: Button
     private var products = ArrayList<Product>()
     private lateinit var adapter: ProductArrayAdapter
     private lateinit var sharedPreferences: SharedPreferences
@@ -32,7 +31,6 @@ class ProductListActivity : AppCompatActivity() {
 
         listView = findViewById(R.id.listOfProducts)
         addButton = findViewById(R.id.addProductButton)
-        deleteButton = findViewById(R.id.removeProductButton)
 
         sharedPreferences = applicationContext.getSharedPreferences(
             applicationContext.packageName,
@@ -41,22 +39,6 @@ class ProductListActivity : AppCompatActivity() {
 
         adapter = ProductArrayAdapter(this, R.layout.product_row, products)
         listView.adapter = adapter
-
-        subscriptions.add(Observable.just(database)
-            .subscribeOn(Schedulers.io())
-            .subscribe { db ->
-                run {
-                    if (db.productDao().getAll().isEmpty()) {
-                        db.productDao().insert(Product("Piano", 200.0, 20))
-                        db.productDao().insert(Product("Bread", 2.5, 5))
-                        db.productDao().insert(Product("Phone", 150.50, 1))
-                    }
-                    products.addAll(db.productDao().getAll())
-                    runOnUiThread {
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            })
     }
 
     override fun onStart() {
@@ -73,18 +55,26 @@ class ProductListActivity : AppCompatActivity() {
                 Color.parseColor("#000000")
             )
         )
-        deleteButton.setBackgroundColor(
-            sharedPreferences.getInt(
-                "buttonBackgroundColor",
-                Color.parseColor("#FFFFFF")
-            )
-        )
-        deleteButton.setTextColor(
-            sharedPreferences.getInt(
-                "buttonTextColor",
-                Color.parseColor("#000000")
-            )
-        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        subscriptions.add(Observable.just(database)
+            .subscribeOn(Schedulers.io())
+            .subscribe { db ->
+                run {
+                    if (db.productDao().getAll().isEmpty()) {
+                        db.productDao().insert(Product("Piano", 200.0, 20))
+                        db.productDao().insert(Product("Bread", 2.5, 5))
+                        db.productDao().insert(Product("Phone", 150.50, 1))
+                    }
+                    products.clear()
+                    products.addAll(db.productDao().getAll())
+                    runOnUiThread {
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            })
     }
 
     override fun onDestroy() {
@@ -93,19 +83,7 @@ class ProductListActivity : AppCompatActivity() {
     }
 
     fun onAddProduct(view: View) {
-        products.add(
-            Product(
-                "New Product nr." + products.size,
-                Random.nextDouble(0.0, 1000.0),
-                Random.nextInt(0, 100)
-            )
-        )
-        adapter.notifyDataSetChanged()
-    }
-
-    fun onRemoveProduct(view: View) {
-        products.removeAt(products.size - 1)
-        adapter.notifyDataSetChanged()
+        startActivity(Intent(this, ProductViewActivity::class.java))
     }
 
 }

@@ -6,17 +6,11 @@
     "entities": [
       {
         "tableName": "Product",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `purchased` INTEGER NOT NULL, `title` TEXT, `price` REAL NOT NULL, `amount` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `price` REAL NOT NULL, `amount` INTEGER NOT NULL, `purchased` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "uid",
             "columnName": "uid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "purchased",
-            "columnName": "purchased",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -35,6 +29,12 @@
           {
             "fieldPath": "amount",
             "columnName": "amount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "purchased",
+            "columnName": "purchased",
             "affinity": "INTEGER",
             "notNull": true
           }
