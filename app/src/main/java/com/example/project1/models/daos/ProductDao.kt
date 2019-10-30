@@ -1,9 +1,6 @@
 package com.example.project1.models.daos
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.example.project1.models.Product
 
 @Dao
@@ -16,6 +13,9 @@ interface ProductDao {
 
     @Insert
     fun insert(product: Product)
+
+    @Update
+    fun update(product: Product)
 
     @Delete
     fun delete(product: Product)

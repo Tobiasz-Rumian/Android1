@@ -9,18 +9,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.Room
 import com.example.project1.adapters.ProductArrayAdapter
 import com.example.project1.database.AppDatabase
 import com.example.project1.models.Product
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlin.random.Random
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
 
 
 class ProductListActivity : AppCompatActivity() {
@@ -32,6 +27,7 @@ class ProductListActivity : AppCompatActivity() {
     private lateinit var adapter: ProductArrayAdapter
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var database: AppDatabase
+    private val subscriptions = ArrayList<Disposable>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
@@ -50,22 +46,21 @@ class ProductListActivity : AppCompatActivity() {
         adapter = ProductArrayAdapter(this, R.layout.product_row, products)
         listView.adapter = adapter
 
-        val populate = Observable.just(database)
+        subscriptions.add(Observable.just(database)
             .subscribeOn(Schedulers.io())
             .subscribe { db ->
                 run {
-                    if(db.productDao().getAll().isEmpty()){
-                    db.productDao().insert(Product("Piano", 200.0, 20))
-                    db.productDao().insert(Product("Bread", 2.5, 5))
-                    db.productDao().insert(Product("Phone", 150.50, 1))
+                    if (db.productDao().getAll().isEmpty()) {
+                        db.productDao().insert(Product("Piano", 200.0, 20))
+                        db.productDao().insert(Product("Bread", 2.5, 5))
+                        db.productDao().insert(Product("Phone", 150.50, 1))
                     }
                     products.addAll(db.productDao().getAll())
                     runOnUiThread {
                         adapter.notifyDataSetChanged()
                     }
-
                 }
-            }
+            })
     }
 
     override fun onStart() {
@@ -98,6 +93,7 @@ class ProductListActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        subscriptions.forEach(Disposable::dispose)
     }
 
     fun onAddProduct(view: View) {

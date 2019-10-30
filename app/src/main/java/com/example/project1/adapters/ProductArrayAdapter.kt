@@ -9,12 +9,16 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.TextView
+import com.example.project1.MainActivity
 import com.example.project1.R
 import com.example.project1.models.Product
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 
 class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<out Product>) :
     ArrayAdapter<Product>(context, resource, objects) {
-    private var products: List<Product> = objects
+    private val products: List<Product> = objects
+    private val database = MainActivity.database!!
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val product = products[position]
@@ -25,11 +29,18 @@ class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<ou
         val amount = view.findViewById(R.id.amount) as TextView
         val isPurchased = view.findViewById(R.id.isPurchased) as CheckBox
         title.text = product.title
-        price.text = product.price.toString()+" Zł"
+        price.text = product.price.toString() + " Zł"
         amount.text = product.amount.toString()
-        isPurchased.setOnClickListener {
-            products[position].purchased=it.isSelected
-            this.notifyDataSetChanged()
+        isPurchased.setOnCheckedChangeListener { _, isChecked ->
+            val updatePurchaseState = Observable.just(database)
+                .subscribeOn(Schedulers.io())
+                .subscribe { db ->
+                    run {
+                        val productToUpdate = db.productDao().findById(product.uid)
+                        productToUpdate.purchased = isChecked
+                        db.productDao().update(productToUpdate)
+                    }
+                }
         }
         isPurchased.isChecked = product.purchased
         return view
