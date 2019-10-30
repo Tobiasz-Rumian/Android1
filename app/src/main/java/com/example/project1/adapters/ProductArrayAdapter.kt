@@ -2,7 +2,7 @@ package com.example.project1.adapters
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import com.example.project1.MainActivity
+import com.example.project1.ProductViewActivity
 import com.example.project1.R
 import com.example.project1.models.Product
 import io.reactivex.Observable
@@ -41,6 +42,11 @@ class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<ou
                         db.productDao().update(productToUpdate)
                     }
                 }
+        }
+        view.setOnClickListener {
+            val intent = Intent(context, ProductViewActivity::class.java)
+            intent.putExtra("productId",product.uid)
+            context.startActivity(intent)
         }
         isPurchased.isChecked = product.purchased
         return view

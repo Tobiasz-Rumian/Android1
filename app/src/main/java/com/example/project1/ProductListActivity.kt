@@ -4,13 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project1.adapters.ProductArrayAdapter
-import com.example.project1.database.AppDatabase
 import com.example.project1.models.Product
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -26,7 +24,7 @@ class ProductListActivity : AppCompatActivity() {
     private var products = ArrayList<Product>()
     private lateinit var adapter: ProductArrayAdapter
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var database: AppDatabase
+    private val database = MainActivity.database!!
     private val subscriptions = ArrayList<Disposable>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +33,6 @@ class ProductListActivity : AppCompatActivity() {
         listView = findViewById(R.id.listOfProducts)
         addButton = findViewById(R.id.addProductButton)
         deleteButton = findViewById(R.id.removeProductButton)
-
-        database = MainActivity.database!!
 
         sharedPreferences = applicationContext.getSharedPreferences(
             applicationContext.packageName,

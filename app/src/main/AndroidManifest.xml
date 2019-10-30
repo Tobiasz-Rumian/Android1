@@ -9,9 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ProductViewActivity" android:parentActivityName=".ProductListActivity"></activity>
         <activity
             android:name=".OptionsActivity"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ProductListActivity"
             android:parentActivityName=".MainActivity" />
