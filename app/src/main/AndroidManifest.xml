@@ -23,6 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name=".provider.MainContentProvider"
+            android:authorities="com.example.project1.provider.MainContentProvider"
+            android:exported="true" />
     </application>
 
 </manifest>
