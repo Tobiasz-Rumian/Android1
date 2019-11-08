@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     companion object DatabaseSetup {
         var database: AppDatabase? = null
         const val TABLE_NAME: String = "Products"
-        var instance = this
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
