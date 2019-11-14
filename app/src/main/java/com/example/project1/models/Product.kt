@@ -29,6 +29,7 @@ data class Product(
                 values.getAsBoolean(PURCHASED)
             return product
         }
+
         fun fromCursor(cursor: Cursor?): Product {
             val product = Product()
             if (cursor!!.moveToFirst()) {
@@ -37,12 +38,13 @@ data class Product(
                     product.title = cursor.getString(cursor.getColumnIndex(TITLE))
                     product.price = cursor.getDouble(cursor.getColumnIndex(PRICE))
                     product.amount = cursor.getInt(cursor.getColumnIndex(AMOUNT))
-                    product.purchased = cursor.getInt(cursor.getColumnIndex(PURCHASED))>0
+                    product.purchased = cursor.getInt(cursor.getColumnIndex(PURCHASED)) > 0
                 } while (cursor.moveToNext())
             }
             cursor.close()
             return product
         }
+
         const val UID = "uid"
         const val TITLE = "title"
         const val PRICE = "price"

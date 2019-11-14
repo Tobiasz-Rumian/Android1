@@ -6,10 +6,10 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import com.example.project1.adapters.ProductArrayAdapter
+import com.example.project1.databinding.ActivityProductListBinding
 import com.example.project1.models.Product
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -18,38 +18,34 @@ import io.reactivex.schedulers.Schedulers
 
 class ProductListActivity : AppCompatActivity() {
 
-    private lateinit var listView: ListView
-    private lateinit var addButton: Button
     private var products = ArrayList<Product>()
     private lateinit var adapter: ProductArrayAdapter
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var binding: ActivityProductListBinding
     private val database = MainActivity.database!!
     private val subscriptions = ArrayList<Disposable>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
 
-        listView = findViewById(R.id.listOfProducts)
-        addButton = findViewById(R.id.addProductButton)
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_product_list)
         sharedPreferences = applicationContext.getSharedPreferences(
             applicationContext.packageName,
             Context.MODE_PRIVATE
         )
-
         adapter = ProductArrayAdapter(this, R.layout.product_row, products)
-        listView.adapter = adapter
+        binding.listOfProducts.adapter = adapter
     }
 
     override fun onStart() {
         super.onStart()
-        addButton.setBackgroundColor(
+        binding.addProductButton.setBackgroundColor(
             sharedPreferences.getInt(
                 "buttonBackgroundColor",
                 Color.parseColor("#FFFFFF")
             )
         )
-        addButton.setTextColor(
+        binding.addProductButton.setTextColor(
             sharedPreferences.getInt(
                 "buttonTextColor",
                 Color.parseColor("#000000")

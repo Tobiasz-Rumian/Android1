@@ -1,16 +1,13 @@
 package com.example.project1
 
-import android.content.ContentValues
-import android.content.Context
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.example.project1.databinding.ActivityProductViewBinding
 import com.example.project1.models.Product
 import com.example.project1.provider.MainContentProvider
 import io.reactivex.Observable
@@ -21,23 +18,12 @@ import io.reactivex.schedulers.Schedulers
 class ProductViewActivity : AppCompatActivity() {
     private val subscriptions = ArrayList<Disposable>()
     private lateinit var product: Product
-    private lateinit var titleTextBox: EditText
-    private lateinit var priceTextBox: EditText
-    private lateinit var amountTextBox: EditText
-    private lateinit var isPurchasedCheckBox: CheckBox
-    private lateinit var saveButton: Button
-    private lateinit var deleteButton: Button
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var binding: ActivityProductViewBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_view)
-        titleTextBox = findViewById(R.id.titleTextBox)
-        priceTextBox = findViewById(R.id.priceTextBox)
-        amountTextBox = findViewById(R.id.amountTextBox)
-        isPurchasedCheckBox = findViewById(R.id.isPurchasedCheckBox)
-        saveButton = findViewById(R.id.saveButton)
-        deleteButton = findViewById(R.id.deleteButton)
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_product_view)
         sharedPreferences = applicationContext.getSharedPreferences(
             applicationContext.packageName,
             Context.MODE_PRIVATE
@@ -62,35 +48,35 @@ class ProductViewActivity : AppCompatActivity() {
                             )
                             product = Product.fromCursor(cursor)
                             runOnUiThread {
-                                titleTextBox.setText(product.title)
-                                priceTextBox.setText(product.price.toString())
-                                amountTextBox.setText(product.amount.toString())
-                                isPurchasedCheckBox.isChecked = product.purchased
-                                deleteButton.visibility = View.VISIBLE
+                                binding.titleTextBox.setText(product.title)
+                                binding.priceTextBox.setText(product.price.toString())
+                                binding.amountTextBox.setText(product.amount.toString())
+                                binding.isPurchasedCheckBox.isChecked = product.purchased
+                                binding.deleteButton.visibility = View.VISIBLE
                             }
                         }
                     })
         }
 
-        saveButton.setBackgroundColor(
+        binding.saveButton.setBackgroundColor(
             sharedPreferences.getInt(
                 "buttonBackgroundColor",
                 Color.parseColor("#FFFFFF")
             )
         )
-        saveButton.setTextColor(
+        binding.saveButton.setTextColor(
             sharedPreferences.getInt(
                 "buttonTextColor",
                 Color.parseColor("#000000")
             )
         )
-        deleteButton.setBackgroundColor(
+        binding.deleteButton.setBackgroundColor(
             sharedPreferences.getInt(
                 "buttonBackgroundColor",
                 Color.parseColor("#FFFFFF")
             )
         )
-        deleteButton.setTextColor(
+        binding.deleteButton.setTextColor(
             sharedPreferences.getInt(
                 "buttonTextColor",
                 Color.parseColor("#000000")
@@ -104,10 +90,11 @@ class ProductViewActivity : AppCompatActivity() {
     }
 
     fun onSave(view: View) {
-        val title = titleTextBox.text.takeIf { it.isNotEmpty() }?.toString() ?: "Something"
-        val price = priceTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toDouble() ?: 0.0
-        val amount = amountTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toInt() ?: 0
-        val purchased = isPurchasedCheckBox.isChecked
+        val title = binding.titleTextBox.text.takeIf { it.isNotEmpty() }?.toString() ?: "Something"
+        val price =
+            binding.priceTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toDouble() ?: 0.0
+        val amount = binding.amountTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toInt() ?: 0
+        val purchased = binding.isPurchasedCheckBox.isChecked
         val values = ContentValues()
         values.put(Product.TITLE, title)
         values.put(Product.PRICE, price)
@@ -122,7 +109,22 @@ class ProductViewActivity : AppCompatActivity() {
                             values.put(Product.UID, product.uid)
                             cr.update(MainContentProvider.CONTENT_URI, values, null, null)
                         } else {
-                            cr.insert(MainContentProvider.CONTENT_URI, values)
+                            val id = ContentUris.parseId(
+                                cr.insert(
+                                    MainContentProvider.CONTENT_URI,
+                                    values
+                                )!!
+                            )
+                            val sendIntent: Intent = Intent().apply {
+                                action = "com.example.android2.MyReceiver"
+                                component = ComponentName(
+                                    "com.example.android2",
+                                    "com.example.android2.MyReceiver"
+                                )
+                                putExtra("id", id.toInt())
+                                putExtra("title", title)
+                            }
+                            sendBroadcast(sendIntent)
                         }
                         finish()
                     }

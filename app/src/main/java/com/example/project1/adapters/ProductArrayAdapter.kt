@@ -45,7 +45,7 @@ class ProductArrayAdapter(context: Context, resource: Int, objects: ArrayList<ou
         }
         view.setOnClickListener {
             val intent = Intent(context, ProductViewActivity::class.java)
-            intent.putExtra("productId",product.uid)
+            intent.putExtra("productId", product.uid)
             context.startActivity(intent)
         }
         isPurchased.isChecked = product.purchased
