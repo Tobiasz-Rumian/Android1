@@ -1,6 +1,9 @@
 package com.example.project1
 
 import android.content.ContentValues
+import android.content.Context
+import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -24,7 +27,7 @@ class ProductViewActivity : AppCompatActivity() {
     private lateinit var isPurchasedCheckBox: CheckBox
     private lateinit var saveButton: Button
     private lateinit var deleteButton: Button
-
+    private lateinit var sharedPreferences: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_view)
@@ -34,6 +37,11 @@ class ProductViewActivity : AppCompatActivity() {
         isPurchasedCheckBox = findViewById(R.id.isPurchasedCheckBox)
         saveButton = findViewById(R.id.saveButton)
         deleteButton = findViewById(R.id.deleteButton)
+
+        sharedPreferences = applicationContext.getSharedPreferences(
+            applicationContext.packageName,
+            Context.MODE_PRIVATE
+        )
     }
 
     override fun onStart() {
@@ -63,6 +71,31 @@ class ProductViewActivity : AppCompatActivity() {
                         }
                     })
         }
+
+        saveButton.setBackgroundColor(
+            sharedPreferences.getInt(
+                "buttonBackgroundColor",
+                Color.parseColor("#FFFFFF")
+            )
+        )
+        saveButton.setTextColor(
+            sharedPreferences.getInt(
+                "buttonTextColor",
+                Color.parseColor("#000000")
+            )
+        )
+        deleteButton.setBackgroundColor(
+            sharedPreferences.getInt(
+                "buttonBackgroundColor",
+                Color.parseColor("#FFFFFF")
+            )
+        )
+        deleteButton.setTextColor(
+            sharedPreferences.getInt(
+                "buttonTextColor",
+                Color.parseColor("#000000")
+            )
+        )
     }
 
     override fun onDestroy() {
