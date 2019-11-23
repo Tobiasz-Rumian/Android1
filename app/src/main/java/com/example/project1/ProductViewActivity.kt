@@ -124,7 +124,7 @@ class ProductViewActivity : AppCompatActivity() {
                                 putExtra("id", id.toInt())
                                 putExtra("title", title)
                             }
-                            sendBroadcast(sendIntent)
+                            sendBroadcast(sendIntent,"com.example.project1")
                         }
                         finish()
                     }
