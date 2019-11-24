@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.project1.MainActivity
 import com.example.project1.R
 import com.example.project1.databinding.ActivityLoginBinding
-import com.example.project1.service.AuthService
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login.*
 
 
@@ -72,7 +72,7 @@ class LoginActivity : AppCompatActivity() {
     private fun login() {
         loading.visibility = View.VISIBLE
 
-        AuthService.mAuth.signInWithEmailAndPassword(
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(
             username.text.toString(),
             password.text.toString()
         )
@@ -80,7 +80,6 @@ class LoginActivity : AppCompatActivity() {
                 loading.visibility = View.GONE
                 if (task.isSuccessful) {
                     Log.d("INFO", "User logged in")
-                    AuthService.checkAuthStatus()
                     startActivity(Intent(this, MainActivity::class.java))
                 } else {
                     Log.w(
@@ -98,7 +97,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun register() {
         loading.visibility = View.VISIBLE
-        AuthService.mAuth.createUserWithEmailAndPassword(
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(
             username.text.toString(),
             password.text.toString()
         )
@@ -106,7 +105,6 @@ class LoginActivity : AppCompatActivity() {
                 loading.visibility = View.GONE
                 if (task.isSuccessful) {
                     Log.d("INFO", "User registered")
-                    AuthService.checkAuthStatus()
                     startActivity(Intent(this, MainActivity::class.java))
                 } else {
                     Log.w(ContentValues.TAG, "User registration failed", task.exception)

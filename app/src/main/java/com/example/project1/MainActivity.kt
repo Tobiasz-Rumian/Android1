@@ -11,8 +11,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.room.Room
 import com.example.project1.database.AppDatabase
 import com.example.project1.databinding.ActivityMainBinding
-import com.example.project1.service.AuthService
 import com.example.project1.ui.login.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
@@ -37,10 +37,9 @@ class MainActivity : AppCompatActivity() {
             Room.databaseBuilder(this, AppDatabase::class.java, getString(R.string.database_name))
                 .build()
         database2 = FirebaseDatabase.getInstance()
-        AuthService.mAuth.addAuthStateListener {
-            fireBaseAuth->
-            if(fireBaseAuth.currentUser==null){
-            startActivity(Intent(this, LoginActivity::class.java))
+        FirebaseAuth.getInstance().addAuthStateListener { fireBaseAuth ->
+            if (fireBaseAuth.currentUser == null) {
+                startActivity(Intent(this, LoginActivity::class.java))
             }
         }
     }
@@ -82,6 +81,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun logout(view: View) {
-        AuthService.mAuth.signOut()
+        FirebaseAuth.getInstance().signOut()
     }
 }
