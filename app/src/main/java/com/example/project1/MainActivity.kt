@@ -11,6 +11,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.room.Room
 import com.example.project1.database.AppDatabase
 import com.example.project1.databinding.ActivityMainBinding
+import com.example.project1.service.AuthService
+import com.example.project1.ui.login.LoginActivity
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -18,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object DatabaseSetup {
         var database: AppDatabase? = null
+        var database2: FirebaseDatabase? = null
         const val TABLE_NAME: String = "Products"
     }
 
@@ -32,6 +36,13 @@ class MainActivity : AppCompatActivity() {
         database =
             Room.databaseBuilder(this, AppDatabase::class.java, getString(R.string.database_name))
                 .build()
+        database2 = FirebaseDatabase.getInstance()
+        AuthService.mAuth.addAuthStateListener {
+            fireBaseAuth->
+            if(fireBaseAuth.currentUser==null){
+            startActivity(Intent(this, LoginActivity::class.java))
+            }
+        }
     }
 
     override fun onStart() {
@@ -68,5 +79,9 @@ class MainActivity : AppCompatActivity() {
 
     fun goToOptions(view: View) {
         startActivity(Intent(this, OptionsActivity::class.java))
+    }
+
+    fun logout(view: View) {
+        AuthService.mAuth.signOut()
     }
 }
