@@ -1,28 +1,38 @@
 package com.example.project1
-
+import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.room.Room
-import com.example.project1.database.AppDatabase
 import com.example.project1.databinding.ActivityMainBinding
+import com.example.project1.models.Shop
 import com.example.project1.ui.login.LoginActivity
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var binding: ActivityMainBinding
+    lateinit var geofencingClient: GeofencingClient
+    private lateinit var databaseRef: DatabaseReference
+    private var shops = ArrayList<Shop>()
+    private var geoFenceList = ArrayList<Geofence>()
 
     companion object DatabaseSetup {
-        var database: AppDatabase? = null
         var database2: FirebaseDatabase? = null
-        const val TABLE_NAME: String = "Products"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,15 +43,16 @@ class MainActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        database =
-            Room.databaseBuilder(this, AppDatabase::class.java, getString(R.string.database_name))
-                .build()
         database2 = FirebaseDatabase.getInstance()
         FirebaseAuth.getInstance().addAuthStateListener { fireBaseAuth ->
             if (fireBaseAuth.currentUser == null) {
                 startActivity(Intent(this, LoginActivity::class.java))
             }
         }
+        setUpDatabase()
+        getPermissions()
+        geofencingClient = LocationServices.getGeofencingClient(this)
+
     }
 
     override fun onStart() {
@@ -80,7 +91,83 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, OptionsActivity::class.java))
     }
 
+    fun goToMap(view: View) {
+        startActivity(Intent(this, MapsActivity::class.java))
+    }
+
+    fun goToShopList(view: View) {
+        startActivity(Intent(this, ShopsListActivity::class.java))
+    }
+
     fun logout(view: View) {
         FirebaseAuth.getInstance().signOut()
+    }
+
+    private fun setUpDatabase() {
+        databaseRef = FirebaseDatabase.getInstance()
+            .getReference("users/" + FirebaseAuth.getInstance().currentUser!!.uid + "/shops")
+        databaseRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val p = dataSnapshot.children.mapNotNull { child -> child.getValue(Shop::class.java) }
+                Log.d("xxx", p.toString())
+                shops.clear()
+                shops.addAll(p)
+                p.onEach { shop -> addGeoFence(shop) }
+                setUpGeoFence()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("DATABASE", "Failed to read value.", error.toException())
+            }
+        })
+    }
+
+    private fun addGeoFence(shop: Shop) {
+        geoFenceList.add(
+            Geofence.Builder()
+                .setRequestId(shop.id)
+                .setCircularRegion(shop.coordinateX, shop.coordinateY, shop.radius.toFloat())
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setExpirationDuration(Long.MAX_VALUE)
+                .build()
+        )
+    }
+
+    private fun getGeoFencingRequest(): GeofencingRequest {
+        return GeofencingRequest.Builder().apply {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geoFenceList)
+        }.build()
+    }
+
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+    private fun getPermissions() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                16
+            )
+
+        }
+    }
+    private fun setUpGeoFence(){
+        geofencingClient.addGeofences(getGeoFencingRequest(), geofencePendingIntent)?.run {
+            addOnSuccessListener {
+                Log.d("xxx","success")
+            }
+            addOnFailureListener {
+                Log.d("xxx",it.toString())
+                Log.d("xxx",geoFenceList.toString())
+            }
+        }
     }
 }

@@ -11,18 +11,18 @@ import android.widget.CheckBox
 import android.widget.TextView
 import com.example.project1.ProductViewActivity
 import com.example.project1.R
-import com.example.project1.models.NewProduct
+import com.example.project1.models.Product
 import com.google.firebase.database.DatabaseReference
 
 
 class ProductArrayAdapter(
     context: Context,
     resource: Int,
-    objects: ArrayList<out NewProduct>,
+    objects: ArrayList<out Product>,
     databaseReference: DatabaseReference
 ) :
-    ArrayAdapter<NewProduct>(context, resource, objects) {
-    private val products: List<NewProduct> = objects
+    ArrayAdapter<Product>(context, resource, objects) {
+    private val products: List<Product> = objects
     private val database = databaseReference
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val product = products[position]

@@ -10,7 +10,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.project1.databinding.ActivityProductViewBinding
-import com.example.project1.models.NewProduct
+import com.example.project1.models.Product
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.disposables.Disposable
@@ -18,7 +18,7 @@ import io.reactivex.disposables.Disposable
 
 class ProductViewActivity : AppCompatActivity() {
     private val subscriptions = ArrayList<Disposable>()
-    private lateinit var product: NewProduct
+    private lateinit var product: Product
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var binding: ActivityProductViewBinding
     private lateinit var databaseRef: DatabaseReference
@@ -41,7 +41,7 @@ class ProductViewActivity : AppCompatActivity() {
             databaseRef = databaseRef.child(productId)
             databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    product = dataSnapshot.getValue(NewProduct::class.java)!!
+                    product = dataSnapshot.getValue(Product::class.java)!!
                     binding.titleTextBox.setText(product.title)
                     binding.priceTextBox.setText(product.price.toString())
                     binding.amountTextBox.setText(product.amount.toString())
@@ -94,10 +94,10 @@ class ProductViewActivity : AppCompatActivity() {
         val amount = binding.amountTextBox.text.takeIf { it.isNotEmpty() }?.toString()?.toInt() ?: 0
         val purchased = binding.isPurchasedCheckBox.isChecked
         if (::product.isInitialized) {
-            databaseRef.setValue(NewProduct(product.id, title, price, amount, purchased))
+            databaseRef.setValue(Product(product.id, title, price, amount, purchased))
         } else {
             val data = databaseRef.push()
-            data.setValue(NewProduct(data.key!!, title, price, amount, purchased))
+            data.setValue(Product(data.key!!, title, price, amount, purchased))
             val sendIntent: Intent = Intent().apply {
                 action = "com.example.android2.MyReceiver"
                 component = ComponentName(
