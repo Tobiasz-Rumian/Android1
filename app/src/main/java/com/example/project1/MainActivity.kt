@@ -98,6 +98,9 @@ class MainActivity : AppCompatActivity() {
     fun goToShopList(view: View) {
         startActivity(Intent(this, ShopsListActivity::class.java))
     }
+    fun goToWeb(view: View) {
+        startActivity(Intent(this, WebActivity::class.java))
+    }
 
     fun logout(view: View) {
         FirebaseAuth.getInstance().signOut()
