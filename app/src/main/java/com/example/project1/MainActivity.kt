@@ -109,7 +109,6 @@ class MainActivity : AppCompatActivity() {
         databaseRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val p = dataSnapshot.children.mapNotNull { child -> child.getValue(Shop::class.java) }
-                Log.d("xxx", p.toString())
                 shops.clear()
                 shops.addAll(p)
                 p.onEach { shop -> addGeoFence(shop) }
@@ -162,11 +161,8 @@ class MainActivity : AppCompatActivity() {
     private fun setUpGeoFence(){
         geofencingClient.addGeofences(getGeoFencingRequest(), geofencePendingIntent)?.run {
             addOnSuccessListener {
-                Log.d("xxx","success")
             }
             addOnFailureListener {
-                Log.d("xxx",it.toString())
-                Log.d("xxx",geoFenceList.toString())
             }
         }
     }
