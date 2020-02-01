@@ -118,7 +118,9 @@ class MainActivity : AppCompatActivity() {
                 shops.clear()
                 shops.addAll(p)
                 p.onEach { shop -> addGeoFence(shop) }
+                if(!geoFenceList.isEmpty()){
                 setUpGeoFence()
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
