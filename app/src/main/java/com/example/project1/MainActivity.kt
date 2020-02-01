@@ -1,5 +1,6 @@
 package com.example.project1
 import android.Manifest
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object DatabaseSetup {
         var database2: FirebaseDatabase? = null
+        val MY_PERMISSIONS_REQUEST_INTERNET = 99
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
         setUpDatabase()
         getPermissions()
+        checkIntentPermission()
         geofencingClient = LocationServices.getGeofencingClient(this)
 
     }
@@ -166,6 +169,42 @@ class MainActivity : AppCompatActivity() {
             addOnSuccessListener {
             }
             addOnFailureListener {
+            }
+        }
+    }
+
+    private fun checkIntentPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.INTERNET
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.INTERNET
+                )
+            ) {
+                AlertDialog.Builder(this)
+                    .setTitle("INTERNET")
+                    .setMessage("INTERNET")
+                    .setPositiveButton(
+                        "OK"
+                    ) { _, _ ->
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.INTERNET),
+                            MY_PERMISSIONS_REQUEST_INTERNET
+                        )
+                    }
+                    .create()
+                    .show()
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.INTERNET),
+                    MY_PERMISSIONS_REQUEST_INTERNET
+                )
             }
         }
     }
